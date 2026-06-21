@@ -96,6 +96,38 @@ const EXPERIENCE = [
   },
 ];
 
+const JOURNEY = [
+  {
+    year: '2022',
+    title: 'Began BS Information Technology',
+    org: 'Saint Paul University Philippines',
+    detail: 'Started the journey — School of Information Technology and Engineering.',
+  },
+  {
+    year: '2025',
+    title: 'Full-Stack Developer & Agentic AI Internship',
+    org: 'Education Centre of Australia',
+    detail: 'Shipped production features across the stack while building agentic AI workflows.',
+  },
+  {
+    year: '2026',
+    title: 'Earned AI-900 Certification',
+    org: 'Microsoft',
+    detail: 'Certified in Azure AI Fundamentals — services, responsible AI, and ML basics.',
+  },
+  {
+    year: '2026',
+    title: 'DICT Internship',
+    org: 'Department of Information and Communications Technology',
+    detail: 'Delivered an internal supplier management system end to end.',
+  },
+  {
+    year: 'Now',
+    title: 'Leading SDO Budget Monitoring System',
+    org: 'DepEd SDO Cagayan',
+    detail: 'Building a multi-role, real-time budget platform serving ten+ user roles.',
+  },
+];
 
 const RESUME = {
   education: [
@@ -124,8 +156,6 @@ type ResumeTab = 'experience' | 'skills' | 'education';
 
 type ChatMessage = { role: 'bot' | 'user'; text: string };
 
-// label = shown on the button. prompt = what's actually sent to the AI, written to pull a
-// genuinely useful, specific answer rather than a vague one-line reply.
 const CHAT_SUGGESTIONS: { label: string; prompt: string }[] = [
   {
     label: 'Tell me about yourself',
@@ -213,6 +243,29 @@ function Cursor({ blink = true }: { blink?: boolean }) {
   return <span className={`cursor ${blink ? 'blink' : ''}`}>▍</span>;
 }
 
+function useReveal() {
+  useEffect(() => {
+    const targets = Array.from(document.querySelectorAll('[data-reveal]'));
+    if (!('IntersectionObserver' in window) || targets.length === 0) {
+      targets.forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+    targets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
+
 function SectionLabel({ path, title }: { path: string; title: string }) {
   return (
     <div className="section-label">
@@ -225,10 +278,6 @@ function SectionLabel({ path, title }: { path: string; title: string }) {
 
 type Theme = 'dark' | 'light';
 
-// Theme now works the same way on every device: read saved preference (or fall back
-// to system preference) on mount, and let the toggle button always switch it manually.
-// Previously this hid the toggle button entirely on mobile and locked it to the
-// system theme, which is why it looked "unresponsive" on phones.
 function useTheme() {
   const [theme, setTheme] = useState<Theme>('dark');
 
@@ -268,8 +317,133 @@ function ThemeToggle({ theme, onToggle }: { theme: Theme; onToggle: () => void }
   );
 }
 
+const GHIBLI_CLOUDS = [
+  { id: 0, top: '6%', width: 340, height: 130, duration: 85, delay: 0 },
+  { id: 1, top: '18%', width: 220, height: 90, duration: 110, delay: -30 },
+  { id: 2, top: '40%', width: 280, height: 110, duration: 95, delay: -55 },
+  { id: 3, top: '64%', width: 200, height: 80, duration: 120, delay: -15 },
+];
+
+const BIRDS = [
+  { id: 0, top: '14%', size: 14, duration: 46, delay: -4 },
+  { id: 1, top: '22%', size: 11, duration: 58, delay: -28 },
+  { id: 2, top: '10%', size: 10, duration: 64, delay: -46 },
+];
+
+type Star = { id: number; left: number; top: number; size: number; duration: number; delay: number };
+
+function useStars(count: number) {
+  const [stars, setStars] = useState<Star[]>([]);
+
+  useEffect(() => {
+    setStars(
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 55,
+        size: 1 + Math.random() * 1.6,
+        duration: 2.5 + Math.random() * 3.5,
+        delay: -Math.random() * 6,
+      }))
+    );
+  }, [count]);
+
+  return stars;
+}
+
+function useParallax() {
+  const farRef = useRef<HTMLDivElement>(null);
+  const midRef = useRef<HTMLDivElement>(null);
+  const nearRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        const y = Math.min(window.scrollY, 1600);
+        if (farRef.current) farRef.current.style.transform = `translateY(${y * 0.02}px)`;
+        if (midRef.current) midRef.current.style.transform = `translateY(${y * 0.045}px)`;
+        if (nearRef.current) nearRef.current.style.transform = `translateY(${y * 0.08}px)`;
+        raf = 0;
+      });
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return { farRef, midRef, nearRef };
+}
+
+function GhibliAtmosphere() {
+  const { farRef, midRef, nearRef } = useParallax();
+  const stars = useStars(60);
+
+  return (
+    <div className="ghibli-atmosphere" aria-hidden="true">
+      <div className="stars-layer">
+        {stars.map((s) => (
+          <span
+            key={s.id}
+            className="star"
+            style={{
+              left: `${s.left}%`,
+              top: `${s.top}%`,
+              width: s.size,
+              height: s.size,
+              animationDuration: `${s.duration}s`,
+              animationDelay: `${s.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+      <div className="celestial-body" />
+      <div className="ghibli-glow" />
+      <div className="ghibli-clouds">
+        {GHIBLI_CLOUDS.map((c) => (
+          <span
+            key={c.id}
+            className="ghibli-cloud"
+            style={{
+              top: c.top,
+              width: c.width,
+              height: c.height,
+              animationDuration: `${c.duration}s`,
+              animationDelay: `${c.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+      <div className="birds-layer">
+        {BIRDS.map((b) => (
+          <span
+            key={b.id}
+            className="bird-fly"
+            style={{
+              top: b.top,
+              animationDuration: `${b.duration}s`,
+              animationDelay: `${b.delay}s`,
+            }}
+          >
+            <span className="bird" style={{ width: b.size, height: b.size * 0.4 }} />
+          </span>
+        ))}
+      </div>
+      <div className="horizon-glow" />
+      <div ref={farRef} className="mountain-layer mountain-far" />
+      <div ref={midRef} className="mountain-layer mountain-mid" />
+      <div ref={nearRef} className="mountain-layer mountain-near" />
+    </div>
+  );
+}
+
 export default function Home() {
   const { theme, toggle } = useTheme();
+  useReveal();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
@@ -288,8 +462,6 @@ export default function Home() {
     }
   }, [chatMessages, chatLoading]);
 
-  // Lock background scroll while the chat panel is open on mobile, so the page
-  // behind it doesn't scroll underneath your thumb while you're typing.
   useEffect(() => {
     if (chatOpen) {
       const prev = document.body.style.overflow;
@@ -327,7 +499,6 @@ export default function Home() {
     setChatInput('');
     setChatLoading(true);
 
-    
     const history = chatMessages
       .slice(1)
       .map((m) => ({ role: m.role === 'bot' ? ('model' as const) : ('user' as const), text: m.text }));
@@ -367,22 +538,25 @@ export default function Home() {
   ];
 
   return (
-    <main className="page">
+    <>
       <nav className="nav">
+
         <span className="nav-brand">
           {PROFILE.name.split(' ')[0].toLowerCase()}
         </span>
         <div className="nav-center">
           <a href="#work">work</a>
           <a href="#experience">experience</a>
+          <a href="#journey">journey</a>
           <a href="#about">about</a>
           <a href="#contact">contact</a>
         </div>
-
         <div className="nav-right">
           <ThemeToggle theme={theme} onToggle={toggle} />
         </div>
       </nav>
+      <main className="page">
+      <GhibliAtmosphere />
 
       <section className="hero">
         <div className="terminal">
@@ -419,11 +593,13 @@ export default function Home() {
       <section id="work" className="section">
         <SectionLabel path="/work" title="selected projects" />
         <div className="projects">
-          {PROJECTS.map((p) => (
+          {PROJECTS.map((p, i) => (
             <a
-              className="project-card"
+              className="project-card reveal"
               href={p.href}
               key={p.name}
+              data-reveal
+              style={{ ['--reveal-delay' as string]: `${i * 90}ms` }}
               onClick={(e) => handleProjectClick(e, p)}
             >
               <div className="project-head">
@@ -445,8 +621,13 @@ export default function Home() {
       <section id="experience" className="section">
         <SectionLabel path="/experience" title="work history" />
         <div className="experience-list">
-          {EXPERIENCE.map((e) => (
-            <div className="experience-item" key={e.role}>
+          {EXPERIENCE.map((e, i) => (
+            <div
+              className="experience-item"
+              key={e.role}
+              data-reveal
+              style={{ ['--reveal-delay' as string]: `${i * 90}ms` }}
+            >
               <div className="experience-head">
                 <h3 className="experience-role">{e.role}</h3>
                 <span className="experience-period">{e.period}</span>
@@ -463,12 +644,36 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="journey" className="section">
+        <SectionLabel path="/journey" title="quest log" />
+        <div className="journey-timeline">
+          {JOURNEY.map((j, i) => (
+            <div
+              className="journey-node"
+              key={`${j.year}-${j.title}`}
+              data-reveal
+              style={{ ['--reveal-delay' as string]: `${i * 110}ms` }}
+            >
+              <div className="journey-marker">
+                <span className="journey-marker-dot" />
+              </div>
+              <div className="journey-content">
+                <span className="journey-year">{j.year}</span>
+                <h3 className="journey-title">{j.title}</h3>
+                <span className="journey-org">{j.org}</span>
+                <p className="journey-detail">{j.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section id="about" className="section">
         <SectionLabel path="/about" title="readme" />
         <div className="about-block">
           <div className="avatar-wrapper">
-            <img 
-              src="/6aaabb51-1339-4d91-8b43-115bcfb71134.jpg" 
+            <img
+              src="/6aaabb51-1339-4d91-8b43-115bcfb71134.jpg"
               alt="Jan Cornelius Miguel Alcaide"
               className="avatar-image"
               onClick={handleAvatarClick}
@@ -511,7 +716,7 @@ export default function Home() {
         <span>{PROFILE.name} — built with Next.js</span>
       </footer>
 
-      {/* Modal */}
+      {/* Project Info Modal */}
       {modalOpen && (
         <>
           <div className="modal-overlay" onClick={() => setModalOpen(false)} />
@@ -548,6 +753,7 @@ export default function Home() {
         </>
       )}
 
+      {/* Resume Modal */}
       {resumeModalOpen && (
         <>
           <div className="modal-overlay" onClick={() => setResumeModalOpen(false)} />
@@ -739,6 +945,9 @@ export default function Home() {
       )}
 
       <style>{`
+        /* ============================================================
+           CSS CUSTOM PROPERTIES — DARK (default) & LIGHT
+        ============================================================ */
         :root {
           --bg: #0B0E14;
           --bg-raised: #11151D;
@@ -750,6 +959,12 @@ export default function Home() {
           --nav-bg: rgba(11, 14, 20, 0.85);
           --terminal-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.6);
           --dot-opacity: 0.85;
+          --ghibli-glow-color: rgba(255, 196, 120, 0.12);
+          --ghibli-cloud-color: rgba(150, 160, 200, 0.10);
+          --mountain-far: rgba(60, 72, 104, 0.42);
+          --mountain-mid: rgba(34, 41, 64, 0.65);
+          --mountain-near: rgba(13, 16, 23, 0.95);
+          --horizon-glow-color: rgba(255, 184, 110, 0.55);
         }
 
         :root[data-theme='light'] {
@@ -763,13 +978,16 @@ export default function Home() {
           --nav-bg: rgba(247, 246, 242, 0.85);
           --terminal-shadow: 0 24px 60px -36px rgba(20, 20, 16, 0.18);
           --dot-opacity: 0.95;
+          --ghibli-glow-color: rgba(255, 196, 110, 0.22);
+          --ghibli-cloud-color: rgba(255, 255, 255, 0.65);
+          --mountain-far: rgba(186, 198, 220, 0.55);
+          --mountain-mid: rgba(146, 161, 192, 0.6);
+          --mountain-near: rgba(222, 217, 203, 0.9);
+          --horizon-glow-color: rgba(255, 170, 90, 0.5);
         }
 
         * { box-sizing: border-box; }
-
-        html {
-          -webkit-text-size-adjust: 100%;
-        }
+        html { -webkit-text-size-adjust: 100%; }
 
         .page,
         .page * {
@@ -783,45 +1001,228 @@ export default function Home() {
           font-family: var(--font-inter), -apple-system, system-ui, sans-serif;
           font-feature-settings: 'tnum';
           overflow-x: hidden;
+          position: relative;
+          padding-top: 65px;
         }
 
-        .mono {
-          font-family: var(--font-jetbrains-mono), 'SFMono-Regular', Consolas, monospace;
+        /* ============================================================
+           REVEAL ANIMATIONS
+        ============================================================ */
+        [data-reveal] {
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.55s ease, transform 0.55s ease;
+          transition-delay: var(--reveal-delay, 0ms);
+        }
+        [data-reveal].is-visible {
+          opacity: 1;
+          transform: translateY(0);
         }
 
-        /* ---------------- NAV ---------------- */
+        /* ============================================================
+           GHIBLI ATMOSPHERE
+        ============================================================ */
+        .ghibli-atmosphere {
+          position: fixed;
+          inset: 0;
+          overflow: hidden;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        /* --- Stars --- */
+        .stars-layer {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .star {
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.85);
+          animation-name: star-twinkle;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        :root[data-theme='light'] .star {
+          display: none;
+        }
+        @keyframes star-twinkle {
+          0%, 100% { opacity: 0.15; transform: scale(1); }
+          50%       { opacity: 0.9;  transform: scale(1.4); }
+        }
+
+        /* --- Celestial body (moon / sun) --- */
+        .celestial-body {
+          position: absolute;
+          top: 8%;
+          right: 12%;
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 38% 38%, #fff8e7, #f0c060);
+          box-shadow:
+            0 0 0 2px rgba(255, 220, 120, 0.18),
+            0 0 24px 8px rgba(255, 210, 100, 0.22),
+            0 0 60px 20px rgba(255, 190, 80, 0.10);
+          animation: celestial-float 18s ease-in-out infinite;
+        }
+        :root[data-theme='light'] .celestial-body {
+          background: radial-gradient(circle at 38% 38%, #fff9c0, #ffe066);
+          box-shadow:
+            0 0 0 2px rgba(255, 240, 100, 0.22),
+            0 0 30px 12px rgba(255, 230, 60, 0.28),
+            0 0 80px 32px rgba(255, 210, 40, 0.12);
+          width: 60px;
+          height: 60px;
+        }
+        @keyframes celestial-float {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50%       { transform: translateY(-10px) scale(1.03); }
+        }
+
+        /* --- Ambient glow --- */
+        .ghibli-glow {
+          position: absolute;
+          top: -20%;
+          right: -10%;
+          width: 60vw;
+          height: 60vw;
+          max-width: 700px;
+          max-height: 700px;
+          border-radius: 50%;
+          background: radial-gradient(circle, var(--ghibli-glow-color) 0%, transparent 70%);
+          filter: blur(10px);
+          animation: ghibli-pulse 14s ease-in-out infinite;
+        }
+        @keyframes ghibli-pulse {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50%       { opacity: 1;   transform: scale(1.08); }
+        }
+
+        /* --- Clouds --- */
+        .ghibli-clouds { position: absolute; inset: 0; }
+        .ghibli-cloud {
+          position: absolute;
+          border-radius: 50%;
+          background: var(--ghibli-cloud-color);
+          filter: blur(36px);
+          animation-name: ghibli-drift;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        @keyframes ghibli-drift {
+          0%   { transform: translateX(-6vw) translateY(0); }
+          50%  { transform: translateX(6vw)  translateY(-2vh); }
+          100% { transform: translateX(-6vw) translateY(0); }
+        }
+
+        /* --- Birds --- */
+        .birds-layer {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .bird-fly {
+          position: absolute;
+          left: -80px;
+          animation-name: bird-cross;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+        .bird {
+          display: block;
+          background: transparent;
+          border-top: 2px solid var(--ink-dim);
+          border-radius: 50% 50% 0 0;
+          opacity: 0.45;
+        }
+        @keyframes bird-cross {
+          from { transform: translateX(0); }
+          to   { transform: translateX(calc(100vw + 160px)); }
+        }
+
+        /* --- Horizon glow --- */
+        .horizon-glow {
+          position: absolute;
+          left: 0; right: 0;
+          bottom: 24vh;
+          height: 2px;
+          background: var(--horizon-glow-color);
+          box-shadow: 0 0 24px 6px var(--horizon-glow-color), 0 0 60px 16px var(--horizon-glow-color);
+          opacity: 0.6;
+          animation: horizon-pulse 8s ease-in-out infinite;
+        }
+        @keyframes horizon-pulse {
+          0%, 100% { opacity: 0.4; }
+          50%       { opacity: 0.75; }
+        }
+
+        /* --- Mountains --- */
+        .mountain-layer {
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          width: 100%;
+        }
+        .mountain-far {
+          height: 26vh;
+          background: var(--mountain-far);
+          clip-path: polygon(
+            0% 100%, 0% 62%, 7% 48%, 16% 64%, 24% 38%, 33% 58%,
+            42% 32%, 51% 55%, 60% 36%, 69% 60%, 78% 40%, 87% 58%,
+            94% 44%, 100% 56%, 100% 100%
+          );
+        }
+        .mountain-mid {
+          height: 18vh;
+          background: var(--mountain-mid);
+          clip-path: polygon(
+            0% 100%, 0% 55%, 10% 70%, 20% 40%, 30% 66%, 40% 35%,
+            50% 62%, 60% 30%, 70% 58%, 80% 38%, 90% 64%, 100% 45%,
+            100% 100%
+          );
+        }
+        .mountain-near {
+          height: 11vh;
+          background: var(--mountain-near);
+          clip-path: polygon(
+            0% 100%, 0% 60%, 12% 80%, 22% 50%, 35% 75%, 48% 45%,
+            58% 72%, 70% 48%, 82% 78%, 92% 55%, 100% 70%, 100% 100%
+          );
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ghibli-atmosphere { display: none; }
+          .cursor.blink { animation: none; }
+          [data-reveal] { opacity: 1; transform: none; transition: none; }
+        }
+
+        /* ============================================================
+           NAV
+        ============================================================ */
         .nav {
-          position: sticky;
+          position: fixed;
           top: 0;
-          z-index: 10;
-
+          left: 0;
+          right: 0;
+          z-index: 100;
           display: grid;
           grid-template-columns: auto 1fr auto;
-
           align-items: center;
-
           padding: 20px clamp(16px, 6vw, 64px);
-
           background: var(--nav-bg);
           backdrop-filter: blur(10px);
           border-bottom: 1px solid var(--line);
         }
-
         .nav-brand {
           justify-self: start;
-
           font-family: var(--font-jetbrains-mono), monospace;
           color: var(--accent);
           font-size: 14px;
           letter-spacing: 0.02em;
           white-space: nowrap;
         }
-
-        .nav-brand::before {
-          content: '~/';
-          color: var(--slate);
-        }
-
+        .nav-brand::before { content: '~/'; color: var(--slate); }
         .nav-center {
           display: flex;
           align-items: center;
@@ -831,9 +1232,7 @@ export default function Home() {
           scrollbar-width: none;
           -ms-overflow-style: none;
         }
-
         .nav-center::-webkit-scrollbar { display: none; }
-
         .nav-center a {
           font-family: var(--font-jetbrains-mono), monospace;
           font-size: 13px;
@@ -842,16 +1241,11 @@ export default function Home() {
           transition: color 0.15s ease;
           white-space: nowrap;
         }
-
         .nav-center a:hover,
-        .nav-center a:focus-visible {
-          color: var(--accent);
-        }
+        .nav-center a:focus-visible { color: var(--accent); }
+        .nav-right { justify-self: end; }
 
-        .nav-right {
-          justify-self: end;
-        }
-
+        /* Theme toggle */
         .theme-toggle {
           display: flex;
           align-items: center;
@@ -865,58 +1259,42 @@ export default function Home() {
           -webkit-tap-highlight-color: transparent;
           touch-action: manipulation;
         }
-
         .theme-toggle:hover,
-        .theme-toggle:focus-visible {
-          border-color: var(--accent);
-          color: var(--accent);
-        }
-
-        .theme-toggle:focus-visible {
-          outline: 1px solid var(--accent);
-          outline-offset: 3px;
-        }
-
+        .theme-toggle:focus-visible { border-color: var(--accent); color: var(--accent); }
+        .theme-toggle:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
         .theme-toggle-flag {
           font-family: var(--font-jetbrains-mono), monospace;
           font-size: 12px;
         }
-
         .theme-toggle-track {
-          width: 30px;
-          height: 18px;
+          width: 30px; height: 18px;
           border-radius: 999px;
           background: var(--line);
-          display: flex;
-          align-items: center;
+          display: flex; align-items: center;
           padding: 2px;
           justify-content: flex-start;
         }
-
-        :root[data-theme='light'] .theme-toggle-track {
-          justify-content: flex-end;
-        }
-
+        :root[data-theme='light'] .theme-toggle-track { justify-content: flex-end; }
         .theme-toggle-thumb {
-          width: 14px;
-          height: 14px;
+          width: 14px; height: 14px;
           border-radius: 50%;
           background: var(--accent);
           color: var(--bg);
           font-size: 9px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex; align-items: center; justify-content: center;
           line-height: 1;
         }
 
-        
+        /* ============================================================
+           HERO
+        ============================================================ */
         .hero {
           padding: clamp(56px, 10vw, 120px) clamp(20px, 6vw, 64px) 80px;
           max-width: 880px;
           margin: 0 auto;
+          position: relative;
+          z-index: 1;
         }
-
         .terminal {
           background: var(--bg-raised);
           border: 1px solid var(--line);
@@ -925,16 +1303,14 @@ export default function Home() {
           box-shadow: var(--terminal-shadow);
         }
         .terminal-bar {
-          display: flex;
-          align-items: center;
-          gap: 8px;
+          display: flex; align-items: center; gap: 8px;
           padding: 12px 16px;
           border-bottom: 1px solid var(--line);
         }
         .dot { width: 11px; height: 11px; border-radius: 50%; opacity: var(--dot-opacity); }
-        .dot.red { background: #FF5F57; }
+        .dot.red    { background: #FF5F57; }
         .dot.yellow { background: #FEBC2E; }
-        .dot.green { background: #28C840; }
+        .dot.green  { background: #28C840; }
         .terminal-title {
           margin-left: 8px;
           font-family: var(--font-jetbrains-mono), monospace;
@@ -950,8 +1326,7 @@ export default function Home() {
         }
         .term-line { white-space: pre-wrap; word-break: break-word; }
         .cmd { color: var(--accent); }
-        .cmd::before { content: ''; }
-        .val { color: var(--ink); padding-left: 0; }
+        .val { color: var(--ink); }
         .cursor { display: inline-block; color: var(--accent); margin-left: 2px; }
         .cursor.blink { animation: blink 1s steps(1) infinite; }
         @keyframes blink { 50% { opacity: 0; } }
@@ -964,13 +1339,7 @@ export default function Home() {
           letter-spacing: -0.01em;
           max-width: 720px;
         }
-
-        .stack-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 28px;
-        }
+        .stack-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
         .stack-pill {
           font-family: var(--font-jetbrains-mono), monospace;
           font-size: 12px;
@@ -978,45 +1347,42 @@ export default function Home() {
           border: 1px solid var(--line);
           border-radius: 999px;
           padding: 6px 14px;
+          transition: color 0.2s ease, border-color 0.2s ease;
         }
+        .stack-pill:hover { color: var(--accent); border-color: var(--accent); }
 
-        
+        /* ============================================================
+           SECTIONS (shared)
+        ============================================================ */
         .section {
           padding: 70px clamp(20px, 6vw, 64px);
           max-width: 880px;
           margin: 0 auto;
           border-top: 1px solid var(--line);
+          position: relative;
+          z-index: 1;
         }
         .section-label {
-          display: flex;
-          align-items: center;
-          gap: 14px;
+          display: flex; align-items: center; gap: 14px;
           margin-bottom: 40px;
         }
         .section-label .path {
           font-family: var(--font-jetbrains-mono), monospace;
-          color: var(--accent);
-          font-size: 13px;
+          color: var(--accent); font-size: 13px;
         }
         .section-label .rule {
-          flex: 0 0 auto;
-          width: 100%;
-          max-width: 60px;
-          height: 1px;
-          background: var(--line);
+          flex: 0 0 auto; width: 100%; max-width: 60px;
+          height: 1px; background: var(--line);
         }
         .section-label .title {
           font-family: var(--font-jetbrains-mono), monospace;
-          color: var(--slate);
-          font-size: 13px;
-          text-transform: lowercase;
+          color: var(--slate); font-size: 13px; text-transform: lowercase;
         }
 
-        
-        .projects {
-          display: grid;
-          gap: 16px;
-        }
+        /* ============================================================
+           PROJECTS
+        ============================================================ */
+        .projects { display: grid; gap: 16px; }
         .project-card {
           display: block;
           background: var(--bg-raised);
@@ -1025,109 +1391,151 @@ export default function Home() {
           padding: 24px;
           text-decoration: none;
           color: inherit;
-          transition: border-color 0.18s ease, transform 0.18s ease;
+          transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
         }
-        .project-card:hover, .project-card:focus-visible {
+        .project-card:hover,
+        .project-card:focus-visible {
           border-color: var(--accent);
           transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(61, 220, 151, 0.08);
         }
         .project-card:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
         .project-head {
-          display: flex;
-          align-items: center;
+          display: flex; align-items: center;
           justify-content: space-between;
-          margin-bottom: 14px;
-          gap: 12px;
+          margin-bottom: 14px; gap: 12px;
         }
         .project-path {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 12px;
-          color: var(--slate);
+          font-size: 12px; color: var(--slate);
         }
         .status-tag {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 11px;
-          padding: 3px 9px;
-          border-radius: 999px;
-          text-transform: lowercase;
-          flex-shrink: 0;
+          font-size: 11px; padding: 3px 9px;
+          border-radius: 999px; text-transform: lowercase; flex-shrink: 0;
         }
-        .status-tag.live { color: var(--accent); background: rgba(61,220,151,0.1); }
-        .status-tag.in-progress { color: #E8C547; background: rgba(232,197,71,0.1); }
-        .status-tag.archived { color: var(--slate); background: rgba(90,100,114,0.15); }
-        .project-name {
-          margin: 0 0 8px;
-          font-size: 19px;
-          font-weight: 600;
-        }
-        .project-desc {
-          margin: 0 0 16px;
-          color: var(--ink-dim);
-          font-size: 14.5px;
-          line-height: 1.6;
-        }
-        .project-stack {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
+        .status-tag.live        { color: var(--accent);  background: rgba(61,220,151,0.1); }
+        .status-tag.in-progress { color: #E8C547;        background: rgba(232,197,71,0.1); }
+        .status-tag.archived    { color: var(--slate);   background: rgba(90,100,114,0.15); }
+        .project-name { margin: 0 0 8px; font-size: 19px; font-weight: 600; }
+        .project-desc { margin: 0 0 16px; color: var(--ink-dim); font-size: 14.5px; line-height: 1.6; }
+        .project-stack { display: flex; flex-wrap: wrap; gap: 8px; }
         .project-stack span {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 11px;
-          color: var(--slate);
-          border: 1px solid var(--line);
-          border-radius: 6px;
-          padding: 3px 8px;
+          font-size: 11px; color: var(--slate);
+          border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px;
         }
 
-        
-        .experience-list {
-          display: grid;
-          gap: 28px;
-        }
+        /* ============================================================
+           EXPERIENCE
+        ============================================================ */
+        .experience-list { display: grid; gap: 28px; }
         .experience-item {
           border-left: 2px solid var(--line);
           padding-left: 20px;
+          transition: border-color 0.2s ease;
         }
+        .experience-item:hover { border-color: var(--accent); }
         .experience-head {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          justify-content: space-between;
-          gap: 8px;
-          margin-bottom: 10px;
+          display: flex; flex-wrap: wrap;
+          align-items: baseline; justify-content: space-between;
+          gap: 8px; margin-bottom: 10px;
         }
-        .experience-role {
-          margin: 0;
-          font-size: 17px;
-          font-weight: 600;
-          max-width: 560px;
-        }
+        .experience-role { margin: 0; font-size: 17px; font-weight: 600; max-width: 560px; }
         .experience-period {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 12px;
-          color: var(--slate);
-          white-space: nowrap;
+          font-size: 12px; color: var(--slate); white-space: nowrap;
         }
         .experience-points {
-          margin: 0;
-          padding-left: 18px;
-          color: var(--ink-dim);
-          font-size: 14.5px;
-          line-height: 1.7;
+          margin: 0; padding-left: 18px;
+          color: var(--ink-dim); font-size: 14.5px; line-height: 1.7;
         }
         .experience-points li { margin-bottom: 6px; }
 
-        
+        /* ============================================================
+           JOURNEY TIMELINE
+        ============================================================ */
+        .journey-timeline {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          position: relative;
+          padding-left: 12px;
+        }
+        .journey-timeline::before {
+          content: '';
+          position: absolute;
+          left: 24px;
+          top: 8px;
+          bottom: 8px;
+          width: 1px;
+          background: var(--line);
+        }
+        .journey-node {
+          display: grid;
+          grid-template-columns: 48px 1fr;
+          gap: 20px;
+          padding: 0 0 36px;
+          position: relative;
+        }
+        .journey-node:last-child { padding-bottom: 0; }
+        .journey-marker {
+          display: flex;
+          justify-content: center;
+          padding-top: 4px;
+          position: relative;
+          z-index: 1;
+        }
+        .journey-marker-dot {
+          width: 10px; height: 10px;
+          border-radius: 50%;
+          background: var(--accent);
+          border: 2px solid var(--bg);
+          box-shadow: 0 0 0 1px var(--accent);
+          flex-shrink: 0;
+          transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .journey-node:hover .journey-marker-dot {
+          box-shadow: 0 0 0 4px rgba(61, 220, 151, 0.2);
+          transform: scale(1.2);
+        }
+        .journey-content { display: flex; flex-direction: column; gap: 3px; }
+        .journey-year {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 11px; color: var(--accent);
+          text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .journey-title {
+          margin: 2px 0 0;
+          font-size: 16px; font-weight: 600; color: var(--ink);
+          transition: color 0.2s ease;
+        }
+        .journey-node:hover .journey-title { color: var(--accent); }
+        .journey-org {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 12px; color: var(--slate);
+        }
+        .journey-detail {
+          margin: 4px 0 0;
+          font-size: 14px; color: var(--ink-dim); line-height: 1.6;
+          max-width: 520px;
+        }
+
+        /* ============================================================
+           ABOUT
+        ============================================================ */
         .about-block {
           display: grid;
           grid-template-columns: 190px 1fr;
           gap: 36px;
           align-items: start;
         }
+        .avatar-wrapper {
+          display: flex; flex-direction: column;
+          align-items: center; gap: 12px;
+        }
         .avatar-image {
-          width: 190px;
-          height: 190px;
+          width: 190px; height: 190px;
           border-radius: 12px;
           border: 1px solid var(--line);
           object-fit: cover;
@@ -1140,866 +1548,502 @@ export default function Home() {
           transform: translateY(-4px);
           box-shadow: 0 8px 20px rgba(61, 220, 151, 0.15);
         }
-        .about-text p {
-          margin: 0 0 14px;
-          color: var(--ink-dim);
-          font-size: 16px;
-          line-height: 1.75;
-          max-width: 560px;
-        }
-
-        /* Avatar Wrapper and Click Me */
-        .avatar-wrapper {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-        }
-
         .click-me-text {
-          display: flex;
-          align-items: center;
-          gap: 6px;
+          display: flex; align-items: center; gap: 6px;
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 12px;
-          color: var(--accent);
+          font-size: 12px; color: var(--accent);
           margin-top: 8px;
           animation: pulse-text 2s ease-in-out infinite;
         }
-
         .arrow {
-          display: inline-block;
-          font-size: 12px;
+          display: inline-block; font-size: 12px;
           animation: bounce-arrow 1.5s ease-in-out infinite;
         }
-
         @keyframes bounce-arrow {
-          0%, 100% {
-            transform: translateY(0);
-            opacity: 0.7;
-          }
-          50% {
-            transform: translateY(-8px);
-            opacity: 1;
-          }
+          0%, 100% { transform: translateY(0);   opacity: 0.7; }
+          50%       { transform: translateY(-8px); opacity: 1; }
         }
-
         @keyframes pulse-text {
-          0%, 100% {
-            opacity: 0.6;
-          }
-          50% {
-            opacity: 1;
-          }
+          0%, 100% { opacity: 0.6; }
+          50%       { opacity: 1; }
+        }
+        .about-text p {
+          margin: 0 0 14px;
+          color: var(--ink-dim); font-size: 16px; line-height: 1.75;
+          max-width: 560px;
         }
 
-        
+        /* ============================================================
+           RESUME MODAL
+        ============================================================ */
         .resume-modal {
-          width: 92vw;
-          max-width: 720px;
-          height: 85vh;
-          max-height: 680px;
+          width: 92vw; max-width: 720px;
+          height: 85vh; max-height: 680px;
           overflow: hidden;
-          display: flex;
-          flex-direction: column;
+          display: flex; flex-direction: column;
           animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
-        .resume-modal .modal-header {
-          padding-right: 44px;
-          gap: 8px;
-        }
-
+        .resume-modal .modal-header { padding-right: 44px; gap: 8px; }
         .resume-download {
           margin-left: auto;
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 12px;
-          color: var(--ink-dim);
+          font-size: 12px; color: var(--ink-dim);
           text-decoration: none;
-          border: 1px solid var(--line);
-          border-radius: 6px;
-          padding: 4px 10px;
+          border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px;
           transition: color 0.15s ease, border-color 0.15s ease;
           flex-shrink: 0;
         }
-        .resume-download:hover {
-          color: var(--accent);
-          border-color: var(--accent);
-        }
-
-        .modal-close-spacer {
-          display: block;
-          width: 36px;
-          flex-shrink: 0;
-        }
-
+        .resume-download:hover { color: var(--accent); border-color: var(--accent); }
+        .modal-close-spacer { display: block; width: 36px; flex-shrink: 0; }
         .resume-body {
-          flex: 1;
-          overflow-y: auto;
+          flex: 1; overflow-y: auto;
           -webkit-overflow-scrolling: touch;
           padding: 28px 28px 32px;
         }
-
         .resume-identity {
-          display: flex;
-          align-items: center;
-          gap: 18px;
+          display: flex; align-items: center; gap: 18px;
           margin-bottom: 28px;
         }
         .resume-avatar {
-          width: 64px;
-          height: 64px;
+          width: 64px; height: 64px;
           border-radius: 10px;
-          object-fit: cover;
-          object-position: center top;
-          border: 1px solid var(--line);
-          flex-shrink: 0;
+          object-fit: cover; object-position: center top;
+          border: 1px solid var(--line); flex-shrink: 0;
         }
-        .resume-name {
-          margin: 0 0 4px;
-          font-size: 19px;
-          font-weight: 600;
-        }
+        .resume-name { margin: 0 0 4px; font-size: 19px; font-weight: 600; }
         .resume-role {
           margin: 0 0 2px;
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 13px;
-          color: var(--accent);
+          font-size: 13px; color: var(--accent);
         }
-        .resume-location {
-          margin: 0;
-          font-size: 13px;
-          color: var(--slate);
-        }
-
+        .resume-location { margin: 0; font-size: 13px; color: var(--slate); }
         .resume-tabs {
-          display: flex;
-          gap: 4px;
+          display: flex; gap: 4px;
           border-bottom: 1px solid var(--line);
-          margin-bottom: 24px;
-          overflow-x: auto;
+          margin-bottom: 24px; overflow-x: auto;
         }
         .resume-tab {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 13px;
-          color: var(--ink-dim);
-          background: transparent;
-          border: none;
+          font-size: 13px; color: var(--ink-dim);
+          background: transparent; border: none;
           border-bottom: 2px solid transparent;
-          padding: 8px 4px 10px;
-          margin-right: 20px;
-          cursor: pointer;
-          text-transform: lowercase;
-          white-space: nowrap;
+          padding: 8px 4px 10px; margin-right: 20px;
+          cursor: pointer; text-transform: lowercase; white-space: nowrap;
         }
-        .resume-tab:hover {
-          color: var(--ink);
-        }
-        .resume-tab.active {
-          color: var(--accent);
-          border-bottom-color: var(--accent);
-        }
-
-        .resume-exp-item, .resume-edu-item {
+        .resume-tab:hover { color: var(--ink); }
+        .resume-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .resume-exp-item,
+        .resume-edu-item {
           border-left: 2px solid var(--line);
-          padding-left: 18px;
-          margin-bottom: 24px;
+          padding-left: 18px; margin-bottom: 24px;
         }
         .resume-exp-head {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          justify-content: space-between;
-          gap: 8px;
-          margin-bottom: 8px;
+          display: flex; flex-wrap: wrap;
+          align-items: baseline; justify-content: space-between;
+          gap: 8px; margin-bottom: 8px;
         }
-        .resume-exp-role {
-          font-size: 14.5px;
-          font-weight: 600;
-          max-width: 440px;
-        }
+        .resume-exp-role { font-size: 14.5px; font-weight: 600; max-width: 440px; }
         .resume-exp-period {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 11.5px;
-          color: var(--slate);
-          white-space: nowrap;
+          font-size: 11.5px; color: var(--slate); white-space: nowrap;
         }
         .resume-exp-points {
-          margin: 0;
-          padding-left: 16px;
-          color: var(--ink-dim);
-          font-size: 13.5px;
-          line-height: 1.65;
+          margin: 0; padding-left: 16px;
+          color: var(--ink-dim); font-size: 13.5px; line-height: 1.65;
         }
         .resume-exp-points li { margin-bottom: 5px; }
-
-        .resume-skill-group {
-          margin-bottom: 20px;
-        }
+        .resume-skill-group { margin-bottom: 20px; }
         .resume-skill-label {
           display: block;
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 11.5px;
-          color: var(--slate);
-          text-transform: lowercase;
-          margin-bottom: 10px;
+          font-size: 11.5px; color: var(--slate);
+          text-transform: lowercase; margin-bottom: 10px;
         }
-        .resume-skill-pills {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
+        .resume-skill-pills { display: flex; flex-wrap: wrap; gap: 8px; }
         .resume-skill-pills span {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 12px;
-          color: var(--ink-dim);
-          border: 1px solid var(--line);
-          border-radius: 999px;
-          padding: 5px 12px;
+          font-size: 12px; color: var(--ink-dim);
+          border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px;
         }
-
-        .resume-edu-school {
-          margin: 0 0 4px;
-          font-size: 13.5px;
-          color: var(--ink);
-        }
-        .resume-edu-note {
-          margin: 0;
-          font-size: 12.5px;
-          color: var(--slate);
-          line-height: 1.5;
-        }
+        .resume-edu-school { margin: 0 0 4px; font-size: 13.5px; color: var(--ink); }
+        .resume-edu-note { margin: 0; font-size: 12.5px; color: var(--slate); line-height: 1.5; }
         .resume-cert-divider {
-          margin: 8px 0 16px;
-          padding-top: 16px;
+          margin: 8px 0 16px; padding-top: 16px;
           border-top: 1px solid var(--line);
         }
         .resume-cert-label {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 11.5px;
-          color: var(--slate);
-          text-transform: lowercase;
+          font-size: 11.5px; color: var(--slate); text-transform: lowercase;
         }
         .resume-cert-item {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          justify-content: space-between;
-          gap: 8px;
-          padding: 10px 0;
+          display: flex; flex-wrap: wrap;
+          align-items: baseline; justify-content: space-between;
+          gap: 8px; padding: 10px 0;
           border-bottom: 1px solid var(--line);
         }
         .resume-cert-item:last-child { border-bottom: none; }
-        .resume-cert-name {
-          font-size: 13.5px;
-          color: var(--ink);
-        }
+        .resume-cert-name { font-size: 13.5px; color: var(--ink); }
         .resume-cert-issuer {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 11.5px;
-          color: var(--accent);
+          font-size: 11.5px; color: var(--accent);
         }
 
-        @media (max-width: 700px) {
-          .resume-modal {
-            width: 95vw;
-            height: 88vh;
-          }
-          .resume-body { padding: 22px 18px 28px; }
-          .resume-identity { gap: 14px; }
-        }
-
-        
+        /* ============================================================
+           CONTACT
+        ============================================================ */
         .contact-block { max-width: 560px; }
-        .contact-line {
-          color: var(--ink-dim);
-          font-size: 16px;
-          margin: 0 0 20px;
-        }
+        .contact-line { color: var(--ink-dim); font-size: 16px; margin: 0 0 20px; }
         .contact-email {
           display: inline-block;
           font-family: var(--font-jetbrains-mono), monospace;
           font-size: clamp(18px, 5vw, 28px);
-          color: var(--ink);
-          text-decoration: none;
+          color: var(--ink); text-decoration: none;
           border-bottom: 1px solid var(--accent);
-          padding-bottom: 4px;
-          margin-bottom: 12px;
+          padding-bottom: 4px; margin-bottom: 12px;
           word-break: break-all;
+          transition: color 0.15s ease;
         }
         .contact-email:hover { color: var(--accent); }
         .contact-phone {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 14px;
-          color: var(--ink-dim);
-          margin: 0 0 28px;
+          font-size: 14px; color: var(--ink-dim); margin: 0 0 28px;
         }
         .social-row { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 20px; }
         .social-row a {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 13px;
-          color: var(--ink-dim);
-          text-decoration: none;
+          font-size: 13px; color: var(--ink-dim); text-decoration: none;
+          transition: color 0.15s ease;
         }
-        .social-row a:hover, .social-row a:focus-visible { color: var(--accent); }
+        .social-row a:hover,
+        .social-row a:focus-visible { color: var(--accent); }
 
+        /* ============================================================
+           FOOTER
+        ============================================================ */
         .footer {
           padding: 32px clamp(20px, 6vw, 64px) 48px;
-          max-width: 880px;
-          margin: 0 auto;
+          max-width: 880px; margin: 0 auto;
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 12px;
-          color: var(--slate);
+          font-size: 12px; color: var(--slate);
+          position: relative; z-index: 1;
         }
 
-        /* Modal Styles */
+        /* ============================================================
+           MODALS (shared)
+        ============================================================ */
         .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          position: fixed; inset: 0;
           background: rgba(0, 0, 0, 0.8);
           backdrop-filter: blur(5px);
           z-index: 999;
           animation: fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-
         .modal {
           position: fixed;
-          top: 50%;
-          left: 50%;
+          top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           background: var(--bg-raised);
           border: 1px solid var(--line);
           border-radius: 10px;
           overflow: hidden;
-          overflow-x: hidden;
-          overflow-y: hidden;
           z-index: 1000;
-          max-width: 520px;
-          width: 90%;
-          box-shadow: 
+          max-width: 520px; width: 90%;
+          box-shadow:
             0 25px 50px -20px rgba(61, 220, 151, 0.15),
             0 0 1px rgba(61, 220, 151, 0.3),
             inset 0 1px 0 rgba(232, 230, 225, 0.05);
           animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
         .modal-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
+          display: flex; align-items: center; gap: 12px;
           padding: 12px 16px;
           border-bottom: 1px solid var(--line);
           background: rgba(0, 0, 0, 0.2);
         }
-
-        .modal-controls {
-          display: flex;
-          gap: 8px;
-        }
-
-        .modal-controls .dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          opacity: 0.85;
-        }
-
-        .modal-controls .dot.red { background: #FF5F57; }
+        .modal-controls { display: flex; gap: 8px; }
+        .modal-controls .dot { width: 12px; height: 12px; border-radius: 50%; opacity: 0.85; }
+        .modal-controls .dot.red    { background: #FF5F57; }
         .modal-controls .dot.yellow { background: #FEBC2E; }
-        .modal-controls .dot.green { background: #28C840; }
-
+        .modal-controls .dot.green  { background: #28C840; }
         .modal-title {
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 12px;
-          color: var(--slate);
-          flex: 1;
-          margin-left: 8px;
+          font-size: 12px; color: var(--slate);
+          flex: 1; margin-left: 8px;
         }
-
         .modal-content {
           padding: 24px;
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: 14px;
-          line-height: 1.8;
-          max-height: 400px;
-          overflow-y: auto;
+          font-size: 14px; line-height: 1.8;
+          max-height: 400px; overflow-y: auto;
           -webkit-overflow-scrolling: touch;
         }
-
         .modal-line {
-          display: flex;
-          gap: 16px;
+          display: flex; gap: 16px;
           animation: typeIn 0.6s ease-out forwards;
           opacity: 0;
         }
-
         .modal-line:nth-child(1) { animation-delay: 0.1s; }
         .modal-line:nth-child(3) { animation-delay: 0.3s; }
-
-        .modal-line-empty {
-          display: flex;
-          gap: 16px;
-          height: 1.8em;
-        }
-
-        .modal-line-num {
-          color: var(--slate);
-          min-width: 28px;
-          text-align: right;
-          opacity: 0.6;
-        }
-
-        .modal-line-text {
-          color: var(--ink);
-          flex: 1;
-          word-wrap: break-word;
-        }
-
-        .modal-line-text::first-letter {
-          color: var(--accent);
-        }
-
+        .modal-line-empty { display: flex; gap: 16px; height: 1.8em; }
+        .modal-line-num { color: var(--slate); min-width: 28px; text-align: right; opacity: 0.6; }
+        .modal-line-text { color: var(--ink); flex: 1; word-wrap: break-word; }
+        .modal-line-text::first-letter { color: var(--accent); }
         .modal-close {
-          position: absolute;
-          top: 14px;
-          right: 14px;
+          position: absolute; top: 14px; right: 14px;
           background: rgba(61, 220, 151, 0.1);
           border: 1px solid rgba(61, 220, 151, 0.3);
-          color: var(--accent);
-          font-size: 16px;
-          cursor: pointer;
-          padding: 5px 9px;
+          color: var(--accent); font-size: 16px;
+          cursor: pointer; padding: 5px 9px;
           border-radius: 6px;
           transition: all 0.2s ease;
           font-family: var(--font-jetbrains-mono), monospace;
           z-index: 1001;
         }
-
         .modal-close:hover {
           background: rgba(61, 220, 151, 0.15);
           border-color: var(--accent);
           transform: rotate(90deg) scale(1.1);
         }
-
-        .modal-close:focus-visible {
-          outline: 1px solid var(--accent);
-          outline-offset: 2px;
-        }
+        .modal-close:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
         @keyframes fadeIn {
-          from { 
-            opacity: 0;
-            backdrop-filter: blur(0px);
-          }
-          to { 
-            opacity: 1;
-            backdrop-filter: blur(4px);
-          }
+          from { opacity: 0; backdrop-filter: blur(0px); }
+          to   { opacity: 1; backdrop-filter: blur(4px); }
         }
-
         @keyframes slideUp {
-          from { 
-            opacity: 0;
-            transform: translate(-50%, -30%) scale(0.9);
-            filter: blur(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            filter: blur(0px);
-          }
+          from { opacity: 0; transform: translate(-50%, -30%) scale(0.9); filter: blur(10px); }
+          to   { opacity: 1; transform: translate(-50%, -50%) scale(1);   filter: blur(0px); }
         }
-
-        @keyframes chatSlideIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes fadeInChat {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
         @keyframes typeIn {
-          from {
-            opacity: 0;
-            transform: translateX(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(-10px); }
+          to   { opacity: 1; transform: translateX(0); }
         }
 
-        /* Light mode modal styles */
-        :root[data-theme='light'] .modal-overlay {
-          background: rgba(26, 29, 36, 0.6);
-          backdrop-filter: blur(5px);
-        }
-
+        /* Light mode modal overrides */
+        :root[data-theme='light'] .modal-overlay { background: rgba(26, 29, 36, 0.6); }
         :root[data-theme='light'] .modal {
           border-color: #E3E1DA;
-          box-shadow: 
+          box-shadow:
             0 20px 40px -10px rgba(31, 154, 107, 0.12),
             0 0 1px rgba(31, 154, 107, 0.2),
             inset 0 1px 0 rgba(247, 246, 242, 0.8);
         }
-
         :root[data-theme='light'] .modal-header {
           background: rgba(247, 246, 242, 0.6);
           border-bottom-color: #E3E1DA;
         }
-
-        :root[data-theme='light'] .modal-title {
-          color: #8A8F9B;
-        }
-
-        :root[data-theme='light'] .modal-content {
-          background: #FFFFFF;
-        }
-
-        :root[data-theme='light'] .modal-line-num {
-          color: #8A8F9B;
-        }
-
-        :root[data-theme='light'] .modal-line-text {
-          color: #1A1D24;
-        }
-
+        :root[data-theme='light'] .modal-title   { color: #8A8F9B; }
+        :root[data-theme='light'] .modal-content { background: #FFFFFF; }
+        :root[data-theme='light'] .modal-line-num  { color: #8A8F9B; }
+        :root[data-theme='light'] .modal-line-text { color: #1A1D24; }
         :root[data-theme='light'] .modal-close {
           background: rgba(31, 154, 107, 0.08);
           border-color: rgba(31, 154, 107, 0.25);
           color: #1F9A6B;
         }
-
         :root[data-theme='light'] .modal-close:hover {
           background: rgba(31, 154, 107, 0.12);
           border-color: #1F9A6B;
         }
 
-        
+        /* ============================================================
+           CHAT
+        ============================================================ */
         .chat-button {
-          position: fixed;
-          bottom: 32px;
-          right: 32px;
-          width: 60px;
-          height: 60px;
+          position: fixed; bottom: 32px; right: 32px;
+          width: 60px; height: 60px;
           border-radius: 50%;
           background: linear-gradient(135deg, var(--accent) 0%, #2ba876 100%);
           border: 2px solid rgba(61, 220, 151, 0.3);
-          color: var(--bg);
-          font-size: 28px;
-          cursor: pointer;
-          z-index: 888;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          color: var(--bg); font-size: 28px;
+          cursor: pointer; z-index: 888;
+          display: flex; align-items: center; justify-content: center;
           box-shadow: 0 4px 20px rgba(61, 220, 151, 0.4);
-          transition: all 0.3s ease;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
           animation: float-chat 3s ease-in-out infinite;
           -webkit-tap-highlight-color: transparent;
           touch-action: manipulation;
         }
-
         .chat-button:hover {
           transform: scale(1.1);
           box-shadow: 0 8px 30px rgba(61, 220, 151, 0.6);
         }
-
-        .chat-button:active {
-          transform: scale(0.95);
-        }
-
+        .chat-button:active { transform: scale(0.95); }
         @keyframes float-chat {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-10px); }
         }
 
-        /* Chat Modal */
         .chat-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          position: fixed; inset: 0;
           background: rgba(0, 0, 0, 0.5);
           backdrop-filter: blur(2px);
           z-index: 900;
           animation: fadeIn 0.3s ease;
         }
-
         .chat-modal {
           position: fixed;
-          bottom: 100px;
-          right: 32px;
-          width: 380px;
-          height: 500px;
+          bottom: 100px; right: 32px;
+          width: 380px; height: 500px;
           background: var(--bg-raised);
           border: 1px solid var(--line);
-          border-radius: 12px;
-          overflow: hidden;
+          border-radius: 12px; overflow: hidden;
           z-index: 901;
           box-shadow: 0 10px 40px rgba(61, 220, 151, 0.2);
-          display: flex;
-          flex-direction: column;
+          display: flex; flex-direction: column;
           animation: chatSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
+        @keyframes chatSlideIn {
+          from { opacity: 0; transform: translateY(20px) scale(0.96); }
+          to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
         .chat-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+          display: flex; align-items: center; justify-content: space-between;
           padding: 16px 20px;
           border-bottom: 1px solid var(--line);
           background: rgba(61, 220, 151, 0.05);
         }
-
-        .chat-header h3 {
-          margin: 0;
-          font-size: 16px;
-          font-weight: 600;
-          color: var(--ink);
-        }
-
+        .chat-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
         .chat-close {
-          background: transparent;
-          border: none;
-          color: var(--ink-dim);
-          font-size: 18px;
-          cursor: pointer;
-          transition: color 0.2s ease;
+          background: transparent; border: none;
+          color: var(--ink-dim); font-size: 18px;
+          cursor: pointer; transition: color 0.2s ease;
           padding: 4px 8px;
           -webkit-tap-highlight-color: transparent;
           touch-action: manipulation;
         }
-
-        .chat-close:hover {
-          color: var(--accent);
-        }
-
+        .chat-close:hover { color: var(--accent); }
         .chat-body {
-          flex: 1;
-          overflow-y: auto;
+          flex: 1; overflow-y: auto;
           -webkit-overflow-scrolling: touch;
           padding: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+          display: flex; flex-direction: column; gap: 12px;
         }
-
         .chat-message {
-          display: flex;
-          gap: 8px;
+          display: flex; gap: 8px;
           animation: fadeInChat 0.3s ease;
         }
-
-        .chat-message p {
-          margin: 0;
-          padding: 10px 14px;
-          border-radius: 8px;
-          font-size: 14px;
-          max-width: 80%;
-          word-wrap: break-word;
+        @keyframes fadeInChat {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
-
+        .chat-message p {
+          margin: 0; padding: 10px 14px;
+          border-radius: 8px; font-size: 14px;
+          max-width: 80%; word-wrap: break-word;
+        }
         .chat-message.bot p {
           background: rgba(61, 220, 151, 0.1);
           color: var(--ink);
           border-left: 2px solid var(--accent);
         }
-
         .chat-message.user p {
           background: var(--accent);
           color: var(--bg);
           margin-left: auto;
         }
-
         .chat-suggestions {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+          display: flex; flex-direction: column; gap: 8px;
           margin-top: 8px;
         }
-
         .suggestion-btn {
           padding: 10px 14px;
           border: 1px solid var(--accent);
-          background: transparent;
-          color: var(--accent);
-          border-radius: 8px;
-          font-size: 13px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          text-align: left;
-          font-weight: 500;
+          background: transparent; color: var(--accent);
+          border-radius: 8px; font-size: 13px;
+          cursor: pointer; transition: all 0.2s ease;
+          text-align: left; font-weight: 500;
           -webkit-tap-highlight-color: transparent;
           touch-action: manipulation;
         }
-
         .suggestion-btn:hover {
           background: rgba(61, 220, 151, 0.15);
           box-shadow: 0 0 8px rgba(61, 220, 151, 0.2);
         }
-
         .chat-input-area {
-          display: flex;
-          gap: 8px;
+          display: flex; gap: 8px;
           padding: 16px;
           padding-bottom: max(16px, env(safe-area-inset-bottom));
           border-top: 1px solid var(--line);
           background: rgba(0, 0, 0, 0.1);
         }
-
         .chat-input {
-          flex: 1;
-          min-width: 0;
+          flex: 1; min-width: 0;
           padding: 10px 14px;
-          border: 1px solid var(--line);
-          border-radius: 8px;
-          background: var(--bg);
-          color: var(--ink);
+          border: 1px solid var(--line); border-radius: 8px;
+          background: var(--bg); color: var(--ink);
           font-size: 16px;
           font-family: var(--font-inter);
           transition: border-color 0.2s ease;
         }
-
-        .chat-input:focus {
-          outline: none;
-          border-color: var(--accent);
-        }
-
+        .chat-input:focus { outline: none; border-color: var(--accent); }
         .chat-send {
           padding: 10px 16px;
           background: linear-gradient(135deg, var(--accent) 0%, #2ba876 100%);
-          border: none;
-          border-radius: 8px;
-          color: var(--bg);
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          flex-shrink: 0;
+          border: none; border-radius: 8px;
+          color: var(--bg); font-size: 13px; font-weight: 600;
+          cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;
           -webkit-tap-highlight-color: transparent;
           touch-action: manipulation;
         }
-
         .chat-send:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(61, 220, 151, 0.4);
         }
-
-        .chat-send:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-          transform: none;
-          box-shadow: none;
-        }
-
-        .chat-input:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
+        .chat-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .chat-input:disabled { opacity: 0.6; cursor: not-allowed; }
         .chat-typing {
-          display: flex;
-          align-items: center;
-          gap: 4px;
+          display: flex; align-items: center; gap: 4px;
           padding: 12px 14px !important;
         }
         .chat-typing span {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
+          width: 6px; height: 6px; border-radius: 50%;
           background: var(--ink-dim);
           animation: typing-bounce 1.2s ease-in-out infinite;
         }
         .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
         .chat-typing span:nth-child(3) { animation-delay: 0.3s; }
         @keyframes typing-bounce {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-          30% { transform: translateY(-4px); opacity: 1; }
+          0%, 60%, 100% { transform: translateY(0);   opacity: 0.5; }
+          30%            { transform: translateY(-4px); opacity: 1; }
         }
 
-        /* Light mode chat */
-        :root[data-theme='light'] .chat-modal {
-          background: #FFFFFF;
-          border-color: #E3E1DA;
-        }
-
-        :root[data-theme='light'] .chat-header {
-          background: rgba(31, 154, 107, 0.05);
-          border-bottom-color: #E3E1DA;
-        }
-
-        :root[data-theme='light'] .chat-header h3 {
-          color: #1A1D24;
-        }
-
-        :root[data-theme='light'] .chat-input {
-          background: #FFFFFF;
-          border-color: #E3E1DA;
-          color: #1A1D24;
-        }
-
-        :root[data-theme='light'] .chat-input:focus {
-          border-color: #1F9A6B;
-        }
-
-        :root[data-theme='light'] .chat-message.bot p {
-          background: rgba(31, 154, 107, 0.08);
-          color: #1A1D24;
-        }
-
-        :root[data-theme='light'] .chat-button {
+        /* Light mode chat overrides */
+        :root[data-theme='light'] .chat-modal   { background: #FFFFFF; border-color: #E3E1DA; }
+        :root[data-theme='light'] .chat-header  { background: rgba(31,154,107,0.05); border-bottom-color: #E3E1DA; }
+        :root[data-theme='light'] .chat-header h3 { color: #1A1D24; }
+        :root[data-theme='light'] .chat-input   { background: #FFFFFF; border-color: #E3E1DA; color: #1A1D24; }
+        :root[data-theme='light'] .chat-input:focus { border-color: #1F9A6B; }
+        :root[data-theme='light'] .chat-message.bot p { background: rgba(31,154,107,0.08); color: #1A1D24; }
+        :root[data-theme='light'] .chat-button  {
           background: linear-gradient(135deg, #1F9A6B 0%, #178556 100%);
-          border-color: rgba(31, 154, 107, 0.3);
-          box-shadow: 0 4px 20px rgba(31, 154, 107, 0.3);
+          border-color: rgba(31,154,107,0.3);
+          box-shadow: 0 4px 20px rgba(31,154,107,0.3);
         }
-
-        :root[data-theme='light'] .chat-button:hover {
-          box-shadow: 0 8px 30px rgba(31, 154, 107, 0.4);
-        }
-
-        :root[data-theme='light'] .suggestion-btn {
-          border-color: #1F9A6B;
-          color: #1F9A6B;
-        }
-
+        :root[data-theme='light'] .chat-button:hover { box-shadow: 0 8px 30px rgba(31,154,107,0.4); }
+        :root[data-theme='light'] .suggestion-btn { border-color: #1F9A6B; color: #1F9A6B; }
         :root[data-theme='light'] .suggestion-btn:hover {
-          background: rgba(31, 154, 107, 0.1);
-          box-shadow: 0 0 8px rgba(31, 154, 107, 0.2);
+          background: rgba(31,154,107,0.1);
+          box-shadow: 0 0 8px rgba(31,154,107,0.2);
         }
 
+        /* ============================================================
+           RESPONSIVE
+        ============================================================ */
         @media (max-width: 640px) {
+          .page { padding-top: 110px; }
           .nav {
             grid-template-columns: 1fr auto;
             grid-template-rows: auto auto;
             row-gap: 14px;
             padding: 14px 16px;
           }
-          .nav-brand { grid-column: 1; grid-row: 1; align-self: center; }
-          .nav-right { grid-column: 2; grid-row: 1; align-self: center; }
+          .nav-brand  { grid-column: 1; grid-row: 1; align-self: center; }
+          .nav-right  { grid-column: 2; grid-row: 1; align-self: center; }
           .nav-center {
-            grid-column: 1 / -1;
-            grid-row: 2;
+            grid-column: 1 / -1; grid-row: 2;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px 18px;
+            flex-wrap: wrap; gap: 8px 18px;
             overflow-x: visible;
           }
           .nav-center a { font-size: 12px; }
@@ -2007,22 +2051,16 @@ export default function Home() {
           .theme-toggle { padding: 6px; }
           .theme-toggle-track { margin: 0; }
 
-          /* Chat panel becomes a near-full-screen sheet instead of a fixed
-             380x500 box that overflows off small viewports. */
           .chat-modal {
-            left: 12px;
-            right: 12px;
-            bottom: 12px;
-            top: auto;
+            left: 12px; right: 12px;
+            bottom: 12px; top: auto;
             width: auto;
             height: min(72vh, 560px);
             border-radius: 14px;
           }
           .chat-button {
-            bottom: 20px;
-            right: 20px;
-            width: 54px;
-            height: 54px;
+            bottom: 20px; right: 20px;
+            width: 54px; height: 54px;
             font-size: 24px;
           }
         }
@@ -2035,14 +2073,16 @@ export default function Home() {
 
         @media (max-width: 600px) {
           .about-block { grid-template-columns: 1fr; }
-          .avatar-slot { width: 100%; height: 140px; }
+          .avatar-image { width: 100%; height: 200px; border-radius: 10px; }
           .experience-head { flex-direction: column; align-items: flex-start; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .cursor.blink { animation: none; }
+          .journey-timeline::before { left: 20px; }
+          .journey-node { grid-template-columns: 40px 1fr; }
+          .resume-modal { width: 95vw; height: 88vh; }
+          .resume-body { padding: 22px 18px 28px; }
+          .resume-identity { gap: 14px; }
         }
       `}</style>
-    </main>
+      </main>
+    </>
   );
 }
