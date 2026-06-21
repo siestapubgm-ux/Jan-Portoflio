@@ -225,12 +225,19 @@ function SectionLabel({ path, title }: { path: string; title: string }) {
 
 type Theme = 'dark' | 'light';
 
+// Theme now works the same way on every device: read saved preference (or fall back
+// to system preference) on mount, and let the toggle button always switch it manually.
+// Previously this hid the toggle button entirely on mobile and locked it to the
+// system theme, which is why it looked "unresponsive" on phones.
 function useTheme() {
   const [theme, setTheme] = useState<Theme>('dark');
 
   useEffect(() => {
-    const current = document.documentElement.getAttribute('data-theme') as Theme | null;
-    setTheme(current ?? 'dark');
+    const saved = window.localStorage.getItem('theme') as Theme | null;
+    const resolved: Theme =
+      saved ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(resolved);
+    document.documentElement.setAttribute('data-theme', resolved);
   }, []);
 
   const toggle = () => {
@@ -280,6 +287,18 @@ export default function Home() {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [chatMessages, chatLoading]);
+
+  // Lock background scroll while the chat panel is open on mobile, so the page
+  // behind it doesn't scroll underneath your thumb while you're typing.
+  useEffect(() => {
+    if (chatOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [chatOpen]);
 
   const handleProjectClick = (e: React.MouseEvent<HTMLElement>, project: typeof PROJECTS[0]) => {
     if (project.modalMessage) {
@@ -748,6 +767,10 @@ export default function Home() {
 
         * { box-sizing: border-box; }
 
+        html {
+          -webkit-text-size-adjust: 100%;
+        }
+
         .page,
         .page * {
           transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
@@ -759,6 +782,7 @@ export default function Home() {
           min-height: 100vh;
           font-family: var(--font-inter), -apple-system, system-ui, sans-serif;
           font-feature-settings: 'tnum';
+          overflow-x: hidden;
         }
 
         .mono {
@@ -772,11 +796,11 @@ export default function Home() {
           z-index: 10;
 
           display: grid;
-          grid-template-columns: 1fr auto 1fr;
+          grid-template-columns: auto 1fr auto;
 
           align-items: center;
 
-          padding: 20px clamp(20px, 6vw, 64px);
+          padding: 20px clamp(16px, 6vw, 64px);
 
           background: var(--nav-bg);
           backdrop-filter: blur(10px);
@@ -790,6 +814,7 @@ export default function Home() {
           color: var(--accent);
           font-size: 14px;
           letter-spacing: 0.02em;
+          white-space: nowrap;
         }
 
         .nav-brand::before {
@@ -802,7 +827,12 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           gap: 32px;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
+
+        .nav-center::-webkit-scrollbar { display: none; }
 
         .nav-center a {
           font-family: var(--font-jetbrains-mono), monospace;
@@ -810,6 +840,7 @@ export default function Home() {
           color: var(--ink-dim);
           text-decoration: none;
           transition: color 0.15s ease;
+          white-space: nowrap;
         }
 
         .nav-center a:hover,
@@ -831,6 +862,8 @@ export default function Home() {
           padding: 5px 6px 5px 12px;
           cursor: pointer;
           color: var(--ink-dim);
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
         }
 
         .theme-toggle:hover,
@@ -915,7 +948,7 @@ export default function Home() {
           line-height: 1.9;
           min-height: 220px;
         }
-        .term-line { white-space: pre-wrap; }
+        .term-line { white-space: pre-wrap; word-break: break-word; }
         .cmd { color: var(--accent); }
         .cmd::before { content: ''; }
         .val { color: var(--ink); padding-left: 0; }
@@ -1196,13 +1229,14 @@ export default function Home() {
 
         .modal-close-spacer {
           display: block;
-          witdh: 36px;
+          width: 36px;
           flex-shrink: 0;
         }
 
         .resume-body {
           flex: 1;
           overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
           padding: 28px 28px 32px;
         }
 
@@ -1243,6 +1277,7 @@ export default function Home() {
           gap: 4px;
           border-bottom: 1px solid var(--line);
           margin-bottom: 24px;
+          overflow-x: auto;
         }
         .resume-tab {
           font-family: var(--font-jetbrains-mono), monospace;
@@ -1255,6 +1290,7 @@ export default function Home() {
           margin-right: 20px;
           cursor: pointer;
           text-transform: lowercase;
+          white-space: nowrap;
         }
         .resume-tab:hover {
           color: var(--ink);
@@ -1383,12 +1419,13 @@ export default function Home() {
         .contact-email {
           display: inline-block;
           font-family: var(--font-jetbrains-mono), monospace;
-          font-size: clamp(20px, 4vw, 28px);
+          font-size: clamp(18px, 5vw, 28px);
           color: var(--ink);
           text-decoration: none;
           border-bottom: 1px solid var(--accent);
           padding-bottom: 4px;
           margin-bottom: 12px;
+          word-break: break-all;
         }
         .contact-email:hover { color: var(--accent); }
         .contact-phone {
@@ -1397,7 +1434,7 @@ export default function Home() {
           color: var(--ink-dim);
           margin: 0 0 28px;
         }
-        .social-row { display: flex; gap: 24px; margin-top: 20px; }
+        .social-row { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 20px; }
         .social-row a {
           font-family: var(--font-jetbrains-mono), monospace;
           font-size: 13px;
@@ -1489,6 +1526,7 @@ export default function Home() {
           line-height: 1.8;
           max-height: 400px;
           overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
         }
 
         .modal-line {
@@ -1670,6 +1708,8 @@ export default function Home() {
           box-shadow: 0 4px 20px rgba(61, 220, 151, 0.4);
           transition: all 0.3s ease;
           animation: float-chat 3s ease-in-out infinite;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
         }
 
         .chat-button:hover {
@@ -1744,6 +1784,8 @@ export default function Home() {
           cursor: pointer;
           transition: color 0.2s ease;
           padding: 4px 8px;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
         }
 
         .chat-close:hover {
@@ -1753,6 +1795,7 @@ export default function Home() {
         .chat-body {
           flex: 1;
           overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
           padding: 16px;
           display: flex;
           flex-direction: column;
@@ -1770,7 +1813,7 @@ export default function Home() {
           padding: 10px 14px;
           border-radius: 8px;
           font-size: 14px;
-          max-width: 250px;
+          max-width: 80%;
           word-wrap: break-word;
         }
 
@@ -1804,6 +1847,8 @@ export default function Home() {
           transition: all 0.2s ease;
           text-align: left;
           font-weight: 500;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
         }
 
         .suggestion-btn:hover {
@@ -1815,18 +1860,20 @@ export default function Home() {
           display: flex;
           gap: 8px;
           padding: 16px;
+          padding-bottom: max(16px, env(safe-area-inset-bottom));
           border-top: 1px solid var(--line);
           background: rgba(0, 0, 0, 0.1);
         }
 
         .chat-input {
           flex: 1;
+          min-width: 0;
           padding: 10px 14px;
           border: 1px solid var(--line);
           border-radius: 8px;
           background: var(--bg);
           color: var(--ink);
-          font-size: 14px;
+          font-size: 16px;
           font-family: var(--font-inter);
           transition: border-color 0.2s ease;
         }
@@ -1846,6 +1893,9 @@ export default function Home() {
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
+          flex-shrink: 0;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
         }
 
         .chat-send:hover {
@@ -1936,9 +1986,51 @@ export default function Home() {
         }
 
         @media (max-width: 640px) {
-          .nav { grid-template-columns: auto 1fr auto; gap: 12px; }
-          .nav-center { gap: 16px; }
+          .nav {
+            grid-template-columns: 1fr auto;
+            grid-template-rows: auto auto;
+            row-gap: 14px;
+            padding: 14px 16px;
+          }
+          .nav-brand { grid-column: 1; grid-row: 1; align-self: center; }
+          .nav-right { grid-column: 2; grid-row: 1; align-self: center; }
+          .nav-center {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            overflow-x: visible;
+          }
           .nav-center a { font-size: 12px; }
+          .theme-toggle-flag { display: none; }
+          .theme-toggle { padding: 6px; }
+          .theme-toggle-track { margin: 0; }
+
+          /* Chat panel becomes a near-full-screen sheet instead of a fixed
+             380x500 box that overflows off small viewports. */
+          .chat-modal {
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            top: auto;
+            width: auto;
+            height: min(72vh, 560px);
+            border-radius: 14px;
+          }
+          .chat-button {
+            bottom: 20px;
+            right: 20px;
+            width: 54px;
+            height: 54px;
+            font-size: 24px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .nav-brand { font-size: 13px; }
+          .nav-center { gap: 10px; }
+          .nav-center a { font-size: 11px; }
         }
 
         @media (max-width: 600px) {
