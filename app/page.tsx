@@ -441,6 +441,54 @@ function GhibliAtmosphere() {
   );
 }
 
+/* ============================================================
+   LOCATION BLOCK — live clock + ping animation
+============================================================ */
+function LocationBlock() {
+  const [time, setTime] = useState('');
+  const [date, setDate] = useState('');
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      const opts: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Manila',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      };
+      const dateOpts: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Manila',
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      };
+      setTime(new Intl.DateTimeFormat('en-PH', opts).format(now));
+      setDate(new Intl.DateTimeFormat('en-PH', dateOpts).format(now));
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="location-block">
+      <div className="location-left">
+        <span className="location-ping" />
+        <div className="location-info">
+          <span className="location-name">Tuguegarao City, Philippines</span>
+          <span className="location-tz">UTC+8 · Philippine Standard Time</span>
+        </div>
+      </div>
+      <div className="location-clock">
+        <span className="clock-time">{time}</span>
+        <span className="clock-date">{date}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const { theme, toggle } = useTheme();
   useReveal();
@@ -540,7 +588,6 @@ export default function Home() {
   return (
     <>
       <nav className="nav">
-
         <span className="nav-brand">
           {PROFILE.name.split(' ')[0].toLowerCase()}
         </span>
@@ -692,11 +739,30 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── CONTACT ── */}
       <section id="contact" className="section contact">
         <SectionLabel path="/contact" title="get in touch" />
         <div className="contact-block">
+
+          {/* Availability badge */}
+          <div className="availability-badge">
+            <span className="avail-dot" />
+            <span className="avail-label">available for work</span>
+          </div>
+
+          {/* Preferred roles */}
+          <div className="preferred-roles">
+            <span className="roles-prefix">open to →</span>
+            <span className="role-tag">Full-Stack Developer</span>
+            <span className="role-tag">AI/ML Engineer</span>
+            <span className="role-tag">IT Specialist</span>
+          </div>
+
+          {/* Location / timezone — live clock version */}
+          <LocationBlock />
+
           <p className="contact-line">
-            Currently {PROFILE.status} — based in {PROFILE.location}.
+            Reach out via email or any of the links below — I read everything.
           </p>
           <a className="contact-email" href={`mailto:${PROFILE.email}`}>
             {PROFILE.email}
@@ -1692,7 +1758,172 @@ export default function Home() {
            CONTACT
         ============================================================ */
         .contact-block { max-width: 560px; }
-        .contact-line { color: var(--ink-dim); font-size: 16px; margin: 0 0 20px; }
+
+        /* Availability badge */
+        .availability-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(61, 220, 151, 0.08);
+          border: 1px solid rgba(61, 220, 151, 0.25);
+          border-radius: 999px;
+          padding: 6px 14px;
+          margin-bottom: 20px;
+        }
+        .avail-dot {
+          width: 8px; height: 8px;
+          border-radius: 50%;
+          background: var(--accent);
+          box-shadow: 0 0 0 3px rgba(61, 220, 151, 0.2);
+          animation: avail-pulse 2s ease-in-out infinite;
+          flex-shrink: 0;
+        }
+        @keyframes avail-pulse {
+          0%, 100% { box-shadow: 0 0 0 3px rgba(61, 220, 151, 0.2); }
+          50%       { box-shadow: 0 0 0 6px rgba(61, 220, 151, 0.08); }
+        }
+        .avail-label {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 12px;
+          color: var(--accent);
+          text-transform: lowercase;
+        }
+
+        /* Preferred roles */
+        .preferred-roles {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 24px;
+        }
+        .roles-prefix {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 12px;
+          color: var(--slate);
+        }
+        .role-tag {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 12px;
+          color: var(--ink-dim);
+          border: 1px solid var(--line);
+          border-radius: 6px;
+          padding: 4px 10px;
+          transition: color 0.2s ease, border-color 0.2s ease;
+        }
+        .role-tag:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* ============================================================
+           LOCATION BLOCK — live clock + ping animation
+        ============================================================ */
+        .location-block {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 28px;
+          padding: 16px 20px;
+          background: var(--bg-raised);
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          max-width: 480px;
+          position: relative;
+          overflow: hidden;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .location-block::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(61,220,151,0.04) 0%, transparent 60%);
+          pointer-events: none;
+        }
+        .location-block:hover {
+          border-color: rgba(61, 220, 151, 0.4);
+          box-shadow: 0 4px 20px rgba(61, 220, 151, 0.08);
+        }
+        .location-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-shrink: 0;
+        }
+        .location-ping {
+          width: 10px; height: 10px;
+          border-radius: 50%;
+          background: var(--accent);
+          flex-shrink: 0;
+          position: relative;
+        }
+        .location-ping::after {
+          content: '';
+          position: absolute;
+          inset: -4px;
+          border-radius: 50%;
+          border: 1.5px solid var(--accent);
+          opacity: 0.5;
+          animation: ping-wave 2s ease-out infinite;
+        }
+        @keyframes ping-wave {
+          0%   { transform: scale(0.8); opacity: 0.6; }
+          100% { transform: scale(2);   opacity: 0; }
+        }
+        .location-info {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+        .location-name {
+          font-size: 13px;
+          color: var(--ink);
+          font-weight: 500;
+        }
+        .location-tz {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 10.5px;
+          color: var(--slate);
+        }
+        .location-clock {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 2px;
+          flex-shrink: 0;
+        }
+        .clock-time {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--accent);
+          letter-spacing: 0.04em;
+          animation: clock-tick 1s steps(1) infinite;
+        }
+        @keyframes clock-tick {
+          0%, 49% { opacity: 1; }
+          50%, 99% { opacity: 0.75; }
+        }
+        .clock-date {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 10.5px;
+          color: var(--slate);
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+        }
+
+        /* Light mode location overrides */
+        :root[data-theme='light'] .location-block {
+          background: #FFFFFF;
+          border-color: #E3E1DA;
+        }
+        :root[data-theme='light'] .location-block::before {
+          background: linear-gradient(135deg, rgba(31,154,107,0.04) 0%, transparent 60%);
+        }
+        :root[data-theme='light'] .location-block:hover {
+          border-color: rgba(31, 154, 107, 0.4);
+          box-shadow: 0 4px 20px rgba(31, 154, 107, 0.08);
+        }
+
+        .contact-line { color: var(--ink-dim); font-size: 15px; margin: 0 0 20px; }
         .contact-email {
           display: inline-block;
           font-family: var(--font-jetbrains-mono), monospace;
@@ -1716,6 +1947,17 @@ export default function Home() {
         }
         .social-row a:hover,
         .social-row a:focus-visible { color: var(--accent); }
+
+        /* Light mode contact overrides */
+        :root[data-theme='light'] .availability-badge {
+          background: rgba(31, 154, 107, 0.08);
+          border-color: rgba(31, 154, 107, 0.25);
+        }
+        :root[data-theme='light'] .avail-dot {
+          background: #1F9A6B;
+          box-shadow: 0 0 0 3px rgba(31, 154, 107, 0.2);
+        }
+        :root[data-theme='light'] .avail-label { color: #1F9A6B; }
 
         /* ============================================================
            FOOTER
@@ -2069,17 +2311,22 @@ export default function Home() {
           .nav-brand { font-size: 13px; }
           .nav-center { gap: 10px; }
           .nav-center a { font-size: 11px; }
+          .location-block { max-width: 100%; flex-wrap: wrap; }
+          .location-clock { align-items: flex-start; }
         }
 
         @media (max-width: 600px) {
           .about-block { grid-template-columns: 1fr; }
-          .avatar-image { width: 100%; height: 200px; border-radius: 10px; }
+          .avatar-wrapper { align-items: center; }
+          .avatar-image { width: 140px; height: 140px; border-radius: 10px; }
           .experience-head { flex-direction: column; align-items: flex-start; }
           .journey-timeline::before { left: 20px; }
           .journey-node { grid-template-columns: 40px 1fr; }
           .resume-modal { width: 95vw; height: 88vh; }
           .resume-body { padding: 22px 18px 28px; }
           .resume-identity { gap: 14px; }
+          .location-block { max-width: 100%; }
+          .preferred-roles { gap: 6px; }
         }
       `}</style>
       </main>
