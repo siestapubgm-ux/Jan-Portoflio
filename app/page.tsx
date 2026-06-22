@@ -280,21 +280,19 @@ function SectionLabel({ path, title }: { path: string; title: string }) {
 type Theme = 'dark' | 'light';
 
 function useTheme() {
-  const [theme, setTheme] = useState<Theme>('dark');
+  const hour = new Date().getHours();
+  const timeDefault: Theme = (hour >= 6 && hour < 18) ? 'light' : 'dark';
+
+  const [theme, setTheme] = useState<Theme>(timeDefault);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('theme') as Theme | null;
-    const resolved: Theme =
-      saved ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    setTheme(resolved);
-    document.documentElement.setAttribute('data-theme', resolved);
+    document.documentElement.setAttribute('data-theme', timeDefault);
   }, []);
 
   const toggle = () => {
     setTheme((t) => {
       const next: Theme = t === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
-      window.localStorage.setItem('theme', next);
       return next;
     });
   };
