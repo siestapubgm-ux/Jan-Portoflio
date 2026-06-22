@@ -15,6 +15,7 @@ const PROFILE = {
     { label: 'GitHub', href: 'https://github.com/siestapubgm-ux' },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/jan-cornelius-miguel-alcaide-619a07393/' },
     { label: 'Email', href: 'mailto:jan.alcaide0501@gmail.com' },
+    { label: 'Facebook', href: 'https://www.facebook.com/janzurii' },
   ],
 };
 
@@ -441,9 +442,7 @@ function GhibliAtmosphere() {
   );
 }
 
-/* ============================================================
-   LOCATION BLOCK — live clock + ping animation
-============================================================ */
+
 function LocationBlock() {
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
@@ -1011,9 +1010,7 @@ export default function Home() {
       )}
 
       <style>{`
-        /* ============================================================
-           CSS CUSTOM PROPERTIES — DARK (default) & LIGHT
-        ============================================================ */
+
         :root {
           --bg: #0B0E14;
           --bg-raised: #11151D;
@@ -1071,9 +1068,7 @@ export default function Home() {
           padding-top: 65px;
         }
 
-        /* ============================================================
-           REVEAL ANIMATIONS
-        ============================================================ */
+        
         [data-reveal] {
           opacity: 0;
           transform: translateY(24px);
@@ -1085,9 +1080,7 @@ export default function Home() {
           transform: translateY(0);
         }
 
-        /* ============================================================
-           GHIBLI ATMOSPHERE
-        ============================================================ */
+        
         .ghibli-atmosphere {
           position: fixed;
           inset: 0;
@@ -1263,9 +1256,7 @@ export default function Home() {
           [data-reveal] { opacity: 1; transform: none; transition: none; }
         }
 
-        /* ============================================================
-           NAV
-        ============================================================ */
+        
         .nav {
           position: fixed;
           top: 0;
@@ -1351,9 +1342,7 @@ export default function Home() {
           line-height: 1;
         }
 
-        /* ============================================================
-           HERO
-        ============================================================ */
+        
         .hero {
           padding: clamp(56px, 10vw, 120px) clamp(20px, 6vw, 64px) 80px;
           max-width: 880px;
@@ -1417,9 +1406,7 @@ export default function Home() {
         }
         .stack-pill:hover { color: var(--accent); border-color: var(--accent); }
 
-        /* ============================================================
-           SECTIONS (shared)
-        ============================================================ */
+        
         .section {
           padding: 70px clamp(20px, 6vw, 64px);
           max-width: 880px;
@@ -1445,9 +1432,7 @@ export default function Home() {
           color: var(--slate); font-size: 13px; text-transform: lowercase;
         }
 
-        /* ============================================================
-           PROJECTS
-        ============================================================ */
+        
         .projects { display: grid; gap: 16px; }
         .project-card {
           display: block;
@@ -1492,9 +1477,7 @@ export default function Home() {
           border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px;
         }
 
-        /* ============================================================
-           EXPERIENCE
-        ============================================================ */
+        
         .experience-list { display: grid; gap: 28px; }
         .experience-item {
           border-left: 2px solid var(--line);
@@ -1518,9 +1501,7 @@ export default function Home() {
         }
         .experience-points li { margin-bottom: 6px; }
 
-        /* ============================================================
-           JOURNEY TIMELINE
-        ============================================================ */
+        
         .journey-timeline {
           display: flex;
           flex-direction: column;
@@ -1587,9 +1568,7 @@ export default function Home() {
           max-width: 520px;
         }
 
-        /* ============================================================
-           ABOUT
-        ============================================================ */
+        
         .about-block {
           display: grid;
           grid-template-columns: 190px 1fr;
@@ -1639,9 +1618,7 @@ export default function Home() {
           max-width: 560px;
         }
 
-        /* ============================================================
-           RESUME MODAL
-        ============================================================ */
+        
         .resume-modal {
           width: 92vw; max-width: 720px;
           height: 85vh; max-height: 680px;
@@ -1754,9 +1731,7 @@ export default function Home() {
           font-size: 11.5px; color: var(--accent);
         }
 
-        /* ============================================================
-           CONTACT
-        ============================================================ */
+        
         .contact-block { max-width: 560px; }
 
         /* Availability badge */
@@ -1813,9 +1788,7 @@ export default function Home() {
         }
         .role-tag:hover { color: var(--accent); border-color: var(--accent); }
 
-        /* ============================================================
-           LOCATION BLOCK — live clock + ping animation
-        ============================================================ */
+        
         .location-block {
           display: flex;
           align-items: center;
@@ -1959,9 +1932,7 @@ export default function Home() {
         }
         :root[data-theme='light'] .avail-label { color: #1F9A6B; }
 
-        /* ============================================================
-           FOOTER
-        ============================================================ */
+        
         .footer {
           padding: 32px clamp(20px, 6vw, 64px) 48px;
           max-width: 880px; margin: 0 auto;
@@ -1970,9 +1941,7 @@ export default function Home() {
           position: relative; z-index: 1;
         }
 
-        /* ============================================================
-           MODALS (shared)
-        ============================================================ */
+        
         .modal-overlay {
           position: fixed; inset: 0;
           background: rgba(0, 0, 0, 0.8);
@@ -2088,9 +2057,7 @@ export default function Home() {
           border-color: #1F9A6B;
         }
 
-        /* ============================================================
-           CHAT
-        ============================================================ */
+        
         .chat-button {
           position: fixed; bottom: 32px; right: 32px;
           width: 60px; height: 60px;
@@ -2269,9 +2236,7 @@ export default function Home() {
           box-shadow: 0 0 8px rgba(31,154,107,0.2);
         }
 
-        /* ============================================================
-           RESPONSIVE
-        ============================================================ */
+        
         @media (max-width: 640px) {
           .page { padding-top: 110px; }
           .nav {
